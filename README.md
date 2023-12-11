@@ -17,6 +17,10 @@ IA Discordia Magick System
     depending on Chaos Magick skill.
   - Now supporting spells with same title, different formulae => different results
 - Spells sold separately.
+- Learn painful lessons in security models, including:
+  - Something you know
+  - Something you have
+  - Something you are
 
 TODO
 - on_use_node should allow to replace or alter node
