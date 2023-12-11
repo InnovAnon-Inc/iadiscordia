@@ -21,6 +21,8 @@ IA Discordia Magick System
   - Something you know
   - Something you have
   - Something you are
+  - Salt
+  - One-way/trapdoor functions
 
 TODO
 - on_use_node should allow to replace or alter node
