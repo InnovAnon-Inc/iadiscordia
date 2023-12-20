@@ -130,8 +130,23 @@ function iadiscordia.cast_spell(user, actual, expected, random_lvl)
 	return true
 end
 
+local MODMEM = minetest.get_mod_storage()
+local salt   = MODMEM:get_int("salt") --or nil
+if salt == nil then
+	local seed = minetest.get_mapgen_setting("seed")
+	--salt = math.random()
+	MODMEM:set_int("salt", seed)
+end
+
+local function saltpw(owner, text)
+	assert(owner ~= nil)
+	assert(text  ~= nil)
+	--return minetest.get_worldpath()..salt..owner..text
+	return salt..owner..text
+end
+
 function iadiscordia.on_use_helper(itemstack, user, title, text, owner,
-	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)
+	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)--, bypass)
 
 	assert(itemstack ~= nil)
 	assert(user ~= nil)
@@ -144,12 +159,12 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner,
 	assert(random_lvl ~= nil)
 	assert(random_cnt ~= nil)
 	assert(random_rnd ~= nil)
+	--assert(bypass ~= nil)
 
-	local actual   = owner..text
 	local spell    = iadiscordia.spells[title]
 	if spell == nil then
-		print('spell does not exist')
-		iadiscordia.chat_send_user(user, S('Unrecognized spell'))
+		print('spell does not exist: '..title)
+		iadiscordia.chat_send_user(user, S('Unrecognized spell: '..title))
 		return nil
 	end
 	if not iadiscordia.spell_cost(user, random_mp, random_hp) then
@@ -157,11 +172,15 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner,
 		iadiscordia.chat_send_user(user, S('Fatally insufficient MP and/or HP'))
 		return nil
 	end
+	--if not bypass then
+	--local actual   = owner..text
+	local actual   = saltpw(owner, text)
 	local flag = false
 	for _, subspell in ipairs(spell) do
 		local expected = subspell.password
 		if TEST_CAST_SPELL then -- it's easier to guess if we give you the salt
-			expected = owner..expected
+			--expected = owner..expected
+			expected = saltpw(owner, expected)
 		end
 
 		if iadiscordia.cast_spell(user, actual, expected, random_lvl) then
@@ -175,6 +194,7 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner,
 		-- TODO punish player
 		return nil
 	end
+	--end
 
 	if minetest.get_modpath("spacecannon") then
 		local pos = user:get_pos()
@@ -202,7 +222,7 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner,
 
 	-- if spell is epic then level = level - 9000
 
-	-- TODO random_cnt
+	-- TODO random_cnt, random_lvl
 	cnt = math.floor(cnt * (1 - 1 / (level + 1)))
 	if cnt == 0 then
 		iadiscordia.chat_send_user(user, S('Technical success: insufficient magick level or stack count'))
@@ -330,6 +350,6 @@ function iadiscordia.on_use(itemstack, user, pointed_thing)
 	local random_cnt = get_random_cnt(name)
 	local random_rnd = get_random_rnd(name)
 	return iadiscordia.on_use_helper(itemstack, user, title, text, owner,
-	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)
+	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)--, false)
 end
 

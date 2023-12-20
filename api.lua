@@ -42,8 +42,10 @@ function iadiscordia.on_use_generic(itemstack, user, pointed_thing)
 	local random_lvl = false
 	local random_cnt = false
 	local random_rnd = false
+	print('itemname: '..itemname)
+	print('description: '..description)
 	return iadiscordia.on_use_helper(itemstack, user, itemname, description, set_id,
-	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)
+	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)--, false)
 end
 end
 
@@ -95,7 +97,7 @@ function iadiscordia.on_use_node(itemstack, user, pointed_thing)
 	local random_cnt = false
 	local random_rnd = false
 	local newnode = iadiscordia.on_use_helper(itemstack, user, title, text, owner,
-	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)
+	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)--, false)
 	if newnode == nil then return nil end
 	minetest.remove_node(pos)
 	--minetest.set_node(pos, newnode)

@@ -1,8 +1,5 @@
--- TODO a couple books don't do anything
 -- TODO stone doesn't do anything
--- TODO no way to craft stickers
--- TODO no way to craft wand
--- TODO need a magic item on which to use engraved items/tools
+-- TODO add groups so wizard villager has an easier time
 
 
 
@@ -35,6 +32,10 @@ iadiscordia.register_apple = function(name, description, image, on_use, magic)
 	def.on_use          = on_use
 	if magic then
 		def.light_source    = minetest.LIGHT_MAX
+
+		def.on_rightclick   = function(pos, node, clicker, itemstack, pointed_thing)
+			iadiscordia.on_use_generic(itemstack, clicker, pointed_thing)
+		end
 	end
 	def.after_place_node = function(pos, placer, itemstack)
 		minetest.set_node(pos, {name=name, param2=1})
@@ -277,10 +278,13 @@ iadiscordia.register_book("iadiscordia:grimoire", S("The Culmination of your Stu
 -- Stones
 --
 
--- TODO need a way to use engraved items on a magick item to check them and cast the spell
---iadiscordia.register_replacement("default:paper", "iadiscordia:sacred_chao_sticker", "Chao")
---iadiscordia.register_replacement("default:paper", "iadiscordia:chaos_star_sticker",  "Star")
---iadiscordia.register_replacement("default:stick", "iadiscordia:wand",                "Wand")
+iadiscordia.register_replacement("default:paper", "iadiscordia:sacred_chao_sticker", "Chao")
+iadiscordia.register_replacement("default:paper", "iadiscordia:chaos_star_sticker",  "Star")
+iadiscordia.register_replacement("default:paper", "iadiscordia:naos_sticker",        "NAOS")
+iadiscordia.register_replacement("default:paper", "iadiscordia:gunas_sticker",       "Gunas")
+iadiscordia.register_replacement("default:paper", "iadiscordia:bagua_sticker",       "Bagua")
+iadiscordia.register_replacement("default:paper", "iadiscordia:elder_sticker",       "Elder")
+iadiscordia.register_replacement("default:stick", "iadiscordia:wand",                "Wand")
 
 iadiscordia.register_stick = function(name, description, image, on_use, magic)
 	assert(name ~= nil)
@@ -331,6 +335,15 @@ iadiscordia.register_stone = function(name, description, image, on_use)
 	--minetest.register_node(name, def)
 end
 iadiscordia.register_stone("iadiscordia:philosopher_stone", S("Salve et Coagula"), "stone.png", 
+
+
+-- register_replacement => transmutation circles
+-- transmutation circle casts spell with bypass; just needs spell title encoded
+
+-- philosopher's stone should store mana&levels from victims and be consumable
+-- philosopher's stone can be used as fuel in trans circle => auto magic (use mana)
+-- philosopher's stone can be used as upgrades in trans circle => cast at higher level
+-- on_use => item eat => next spell will be cast at effective level
 
 -- transmutation circles => cast spells without all the guesswork
 -- human transmutation circle => set human trans flag on player
