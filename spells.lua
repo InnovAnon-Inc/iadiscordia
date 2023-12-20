@@ -26,10 +26,13 @@ function iadiscordia.register_spell(title, text)
 end
 
 local DEBUG_SPELL_COST = false
-function iadiscordia.spell_cost(user)
+function iadiscordia.spell_cost(user, random_mp, random_hp)
 	assert(user ~= nil)
+	assert(random_mp ~= nil)
+	assert(random_hp ~= nil)
 	local set_id = user:get_player_name()
 	assert(set_id ~= nil)
+	-- TODO random_mp
 	local m      = mana.get   (set_id)
 	assert(m ~= nil)
 	local mm     = mana.getmax(set_id)
@@ -38,6 +41,7 @@ function iadiscordia.spell_cost(user)
 	assert(r ~= nil)
 	local prop   = user:get_properties()
 	assert(prop ~= nil)
+	-- TODO random_hp
 	local h      = user:get_hp()
 	assert(h ~= nil)
 	local hm     = prop["hp_max"] or 20 -- should work with upgrades
@@ -62,10 +66,11 @@ end
 local DEBUG_CAST_SPELL = true
 local TEST_CAST_SPELL  = true
 local hash_len         = 40
-function iadiscordia.cast_spell(user, actual, expected)
+function iadiscordia.cast_spell(user, actual, expected, random_lvl)
 	assert(user ~= nil)
 	assert(actual ~= nil)
 	assert(expected ~= nil)
+	assert(random_lvl ~= nil)
 	if DEBUG_CAST_SPELL then
 	print('actual: '..actual)
 	print('expected: '..expected)
@@ -85,6 +90,7 @@ function iadiscordia.cast_spell(user, actual, expected)
 	expected = minetest.sha1(expected)
 
 	local set_id = user:get_player_name()
+	-- TODO random lvl
 	local lvl   = SkillsFramework.get_level(set_id, "iadiscordia:Chaos Magick")
 	assert(lvl ~= nil)
 	-- if spell is epic then lvl = lvl - 9000
@@ -124,12 +130,21 @@ function iadiscordia.cast_spell(user, actual, expected)
 	return true
 end
 
-function iadiscordia.on_use_helper(itemstack, user, title, text, owner)
+function iadiscordia.on_use_helper(itemstack, user, title, text, owner,
+	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)
+
 	assert(itemstack ~= nil)
 	assert(user ~= nil)
 	assert(title ~= nil)
 	assert(text ~= nil)
 	assert(owner ~= nil)
+	assert(random_mp ~= nil)
+	assert(random_hp ~= nil)
+	assert(random_xp ~= nil)
+	assert(random_lvl ~= nil)
+	assert(random_cnt ~= nil)
+	assert(random_rnd ~= nil)
+
 	local actual   = owner..text
 	local spell    = iadiscordia.spells[title]
 	if spell == nil then
@@ -137,7 +152,7 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner)
 		iadiscordia.chat_send_user(user, S('Unrecognized spell'))
 		return nil
 	end
-	if not iadiscordia.spell_cost(user) then
+	if not iadiscordia.spell_cost(user, random_mp, random_hp) then
 		print('not enough mana')
 		iadiscordia.chat_send_user(user, S('Fatally insufficient MP and/or HP'))
 		return nil
@@ -149,7 +164,7 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner)
 			expected = owner..expected
 		end
 
-		if iadiscordia.cast_spell(user, actual, expected) then
+		if iadiscordia.cast_spell(user, actual, expected, random_lvl) then
 			print('spell found')
 			iadiscordia.chat_send_user(user, S('Spell found!'))
 			flag = true
@@ -187,6 +202,7 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner)
 
 	-- if spell is epic then level = level - 9000
 
+	-- TODO random_cnt
 	cnt = math.floor(cnt * (1 - 1 / (level + 1)))
 	if cnt == 0 then
 		iadiscordia.chat_send_user(user, S('Technical success: insufficient magick level or stack count'))
@@ -198,6 +214,7 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner)
 	print('ok now do spell')
 	local newname = expected.callback(user)
 
+	-- TODO random_xp
 	-- increase magick XP
 	Skillsframework.add_experience(set_id, "iadiscordia:Chaos Magick", 1)
 	Skillsframework.append_skills(set_id, "iadiscordia:"..title)
@@ -207,6 +224,61 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner)
 	iadiscordia.chat_send_user(user, S('Alchemy Success'))
 	itemstack:set_name(newname)
 	return itemstack
+end
+
+local function get_random_mp(name)
+	local book = iadiscordia.books[name]
+	if book == nil then return false end
+
+	local res  = book.random_mp
+	if res == nil then return false end
+	assert(res == true or res == false)
+	return res
+end
+local function get_random_hp(name)
+	local book = iadiscordia.books[name]
+	if book == nil then return false end
+
+	local res  = book.random_hp
+	if res == nil then return false end
+	assert(res == true or res == false)
+	return res
+end
+local function get_random_xp(name)
+	local book = iadiscordia.books[name]
+	if book == nil then return false end
+
+	local res  = book.random_xp
+	if res == nil then return false end
+	assert(res == true or res == false)
+	return res
+end
+local function get_random_lvl(name)
+	local book = iadiscordia.books[name]
+	if book == nil then return false end
+
+	local res  = book.random_lvl
+	if res == nil then return false end
+	assert(res == true or res == false)
+	return res
+end
+local function get_random_cnt(name)
+	local book = iadiscordia.books[name]
+	if book == nil then return false end
+
+	local res  = book.random_cnt
+	if res == nil then return false end
+	assert(res == true or res == false)
+	return res
+end
+local function get_random_rnd(name)
+	local book = iadiscordia.books[name]
+	if book == nil then return false end
+
+	local res  = book.random_rnd
+	if res == nil then return false end
+	assert(res == true or res == false)
+	return res
 end
 
 local DEBUG_ON_USE = false
@@ -221,8 +293,9 @@ function iadiscordia.on_use(itemstack, user, pointed_thing)
 
 	local pos  = pointed_thing.under
         local node = minetest.get_node(pos)
+	local name = node.name
 	if DEBUG_ON_USE then
-	print('node name: '..node.name)
+	print('node name: '..name)
 	end
 	--if node.name ~= "default:book_open" then
 	--	iadiscordia.chat_send_user(user, S('Expecting an open book'))
@@ -250,10 +323,13 @@ function iadiscordia.on_use(itemstack, user, pointed_thing)
 		return nil
 	end
 
-	local random_mp  = iadiscordia.books[name].random_mp  or false
-	local random_hp  = iadiscordia.books[name].random_hp  or false
-	local random_xp  = iadiscordia.books[name].random_xp  or false
-	local random_lvl = iadiscordia.books[name].random_lvl or false
-	local random_cnt = iadiscordia.books[name].random_cnt or false
-	return iadiscordia.on_use_helper(itemstack, user, title, text, owner)
+	local random_mp  = get_random_mp(name)
+	local random_hp  = get_random_hp(name)
+	local random_xp  = get_random_xp(name)
+	local random_lvl = get_random_lvl(name)
+	local random_cnt = get_random_cnt(name)
+	local random_rnd = get_random_rnd(name)
+	return iadiscordia.on_use_helper(itemstack, user, title, text, owner,
+	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)
 end
+

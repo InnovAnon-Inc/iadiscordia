@@ -23,9 +23,9 @@ iadiscordia.register_apple = function(name, description, image, on_use, magic)
 	--def.name = name
 	def.description     = description
 	if magic then
-		def.groups          =  {dig_immediate=1, hard = 1, metal = 1, not_in_creative_inventory=1,}
+		def.groups          =  {dig_immediate=3, hard = 1, metal = 1, not_in_creative_inventory=1,}
 	else
-		def.groups          =  {dig_immediate=1, hard = 1, metal = 1,}
+		def.groups          =  {dig_immediate=3, hard = 1, metal = 1,}
 	end
 	--def.overlay_tiles   = {}
 	--def.special_tiles   = {}
@@ -83,13 +83,21 @@ iadiscordia.register_replacement("iadiscordia:golden_apple", "iadiscordia:kallis
 -- Books
 --
 
-iadiscordia.register_book = function(name, description, image, on_use, magic)
+iadiscordia.register_book = function(name, description, image, on_use, magic,
+	random_mp, random_hp, random_xp, random_lvl, random_cnt)
+
 	assert(name ~= nil)
 	assert(description ~= nil)
 	assert(image ~= nil)
 	--assert(on_use ~= nil)
 	assert(magic ~= nil)
 	
+	assert(random_mp ~= nil)
+	assert(random_hp ~= nil)
+	assert(random_xp ~= nil)
+	assert(random_lvl ~= nil)
+	assert(random_cnt ~= nil)
+
 	local def           = table.copy(minetest.registered_items["default:book"])
 	--def.name = name
 	def.description     = description
@@ -107,21 +115,36 @@ iadiscordia.register_book = function(name, description, image, on_use, magic)
 
 	minetest.register_craftitem(name, def)
 	iadiscordia.books[name]        = {
-		open      = name.."_open",
-		closed    = name.."_closed",
+		open       = name.."_open",
+		closed     = name.."_closed",
+		random_mp  = random_mp,
+		random_hp  = random_hp,
+		random_xp  = random_xp,
+		random_lvl = random_lvl,
+		random_cnt = random_cnt,
 	}
 	assert(iadiscordia.books[name] ~= nil)
 	assert(iadiscordia.books[name].open ~= nil)
 	iadiscordia.books[iadiscordia.books[name].open]   = {
-		base      = name,
-		closed    = iadiscordia.books[name].closed,
-		is_open   = true,
+		base       = name,
+		closed     = iadiscordia.books[name].closed,
+		is_open    = true,
+		random_mp  = random_mp,
+		random_hp  = random_hp,
+		random_xp  = random_xp,
+		random_lvl = random_lvl,
+		random_cnt = random_cnt,
 	}
 	assert(iadiscordia.books[name].closed ~= nil)
 	iadiscordia.books[iadiscordia.books[name].closed] = {
-		base      = name,
-		open      = iadiscordia.books[name].open,
-		is_closed = true,
+		base       = name,
+		open       = iadiscordia.books[name].open,
+		is_closed  = true,
+		random_mp  = random_mp,
+		random_hp  = random_hp,
+		random_xp  = random_xp,
+		random_lvl = random_lvl,
+		random_cnt = random_cnt,
 	}
 
 	minetest.register_node(iadiscordia.books[name].open, {
@@ -187,35 +210,68 @@ iadiscordia.register_book = function(name, description, image, on_use, magic)
 	})
 end
 --local book_on_use = minetest.registered_items["default:book"].on_use
-iadiscordia.register_book("iadiscordia:manual", S("IA Discordia User Manual"), "kallisti.png", 
+iadiscordia.register_book("iadiscordia:manual", S("IA Discordia User Manual"), "kallisti.png", iadiscordia.on_use_node, true,
+	-- no special effects
+	false, false, false, false, false, false)
 
-function(itemstack, user, pointed_thing)
-	-- TODO tell player how to use the pointed_thing
-    	--local meta        = itemstack:get_meta()
-	--local title = meta:set_string("title", S("IA Discordia User Manual"))
-	--local text  = meta:set_string("text", S("Engrave a golden apple, then use it to get a Kallisti artifact.\nUse the Kallisti artifact on books to learn spells for the owner.\nUse the Chao De Jing on penciled nodes.\nUse engraved items on the Principia Discordia.")) -- TODO engraved items
-	--local owner = meta:set_string("owner")
-	--return book_on_use(itemstack, user, pointed_thing)
-end, true)
-
-iadiscordia.register_book("iadiscordia:chao_de_jing", S("Chao De Jing"), "chao.png", iadiscordia.on_use_node, true)
-
+iadiscordia.register_book("iadiscordia:chao_de_jing", S("Chao De Jing"), "chao.png", iadiscordia.on_use_node, true,
+	-- randomized mana cost
+	true, false, false, false, false, false)
 minetest.register_craftitem("iadiscordia:sacred_chao_sticker", {
 	description     = S("Sacred Chao Sticker"),
 	inventory_image = "chao.png",
 	groups          = {not_in_creative_inventory=1,},
 })
 
-iadiscordia.register_book("iadiscordia:principia_discordia", S("Principia Discordia"), "chaos_star.png", 
--- TODO
-function(itemstack, user, pointed_thing)
-end, true)
-
+iadiscordia.register_book("iadiscordia:principia_discordia", S("Principia Discordia"), "chaos_star.png", iadiscordia.on_use_node, true,
+	-- randomized count
+	false, false, false, false, true, false)
 minetest.register_craftitem("iadiscordia:chaos_star_sticker", {
 	description     = S("Chaos Star Sticker"),
 	inventory_image = "chaos_star.png",
 	groups          = {not_in_creative_inventory=1,},
 })
+
+iadiscordia.register_book("iadiscordia:naos", S("NAOS: A Practical Guide to Modern Magick"), "naos.png", iadiscordia.on_use_node, true,
+	-- randomized experience reward
+	false, false, true, false, false, false)
+minetest.register_craftitem("iadiscordia:naos_sticker", {
+	description     = S("NAOS Sticker"),
+	inventory_image = "naos.png",
+	groups          = {not_in_creative_inventory=1,},
+})
+
+iadiscordia.register_book("iadiscordia:sanatan_dharma", S("Sanatan Dharma, Hinduism Exhumed and Resurrected"), "gunas.png", iadiscordia.on_use_node, true,
+	-- cast spell at a randomized level
+	false, false, false, true, false, false)
+minetest.register_craftitem("iadiscordia:gunas_sticker", {
+	description     = S("Gunas Sticker"),
+	inventory_image = "gunas.png",
+	groups          = {not_in_creative_inventory=1,},
+})
+
+iadiscordia.register_book("iadiscordia:long_life", S("Sex, Health and Long Life"), "bagua.png", iadiscordia.on_use_node, true,
+	-- randomized health cost
+	false, true, false, false, false, false)
+minetest.register_craftitem("iadiscordia:bagua_sticker", {
+	description     = S("Bagua Sticker"),
+	inventory_image = "bagua.png",
+	groups          = {not_in_creative_inventory=1,},
+})
+
+iadiscordia.register_book("iadiscordia:necronomicon", S("The Tome of Abdul Alhazred"), "elder.png", iadiscordia.on_use_node, true,
+	-- random randomized effect
+	false, false, false, false, false, true)
+minetest.register_craftitem("iadiscordia:elder_sticker", {
+	description     = S("Elder Sticker"),
+	inventory_image = "elder.png",
+	groups          = {not_in_creative_inventory=1,},
+})
+
+iadiscordia.register_book("iadiscordia:grimoire", S("The Culmination of your Studies"), "stone.png", iadiscordia.on_use_node, true,
+	-- all randomized effects
+	true, true, true, true, true, false)
+
 
 --
 -- Stones
