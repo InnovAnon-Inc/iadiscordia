@@ -1,4 +1,5 @@
 iadiscordia.spells = {}
+local MODNAME = minetest.get_current_modname()
 
 local S = minetest.get_translator("iadiscordia")
 
@@ -86,6 +87,7 @@ function iadiscordia.cast_spell(user, actual, expected)
 	local set_id = user:get_player_name()
 	local lvl   = SkillsFramework.get_level(set_id, "iadiscordia:Chaos Magick")
 	assert(lvl ~= nil)
+	-- if spell is epic then lvl = lvl - 9000
 	local lr    = math.ceil(hash_len * 1 / (lvl + 1))
 	assert(1  <= lr)
 	assert(lr <= hash_len)
@@ -159,9 +161,31 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner)
 		return nil
 	end
 
+	if minetest.get_modpath("spacecannon") then
+		local pos = user:get_pos()
+		minetest.add_particlespawner({
+				amount = 5,
+				time = 0.5,
+				minpos = pos,
+				maxpos = pos,
+				minvel = {x = -2, y = -2, z = -2},
+				maxvel = {x = 2, y = 2, z = 2},
+				minacc = {x = -3, y = -3, z = -3},
+				maxacc = {x = 3, y = 3, z = 3},
+				minexptime = 1,
+				maxexptime = 2.5,
+				minsize = 0.5,
+				maxsize = 0.75,
+				texture = "spacecannon_spark.png",
+				glow = 5
+		})
+	end
+
 	local cnt    = itemstack:get_count()
 	local set_id = user:get_player_name()
 	local level  = SkillsFramework.get_level(set_id, "iadiscordia:Chaos Magick")
+
+	-- if spell is epic then level = level - 9000
 
 	cnt = math.floor(cnt * (1 - 1 / (level + 1)))
 	if cnt == 0 then

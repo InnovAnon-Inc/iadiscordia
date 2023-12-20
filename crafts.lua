@@ -1,3 +1,4 @@
+local MODNAME = minetest.get_current_modname()
 minetest.register_craft({
    type         = "cooking",
    output       = 'iadiscordia:golden_apple',
@@ -34,6 +35,14 @@ minetest.register_craft({
    },
 })
 
+minetest.register_craft({
+  type          = "shapeless",
+  output        = 'iadiscordia:manual',
+  recipe        = {
+      'default:book',
+      'iadiscordia:kallisti',
+  },
+})
 minetest.register_craft({
   type          = "shapeless",
   output        = 'iadiscordia:principia_discordia',

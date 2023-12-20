@@ -1,18 +1,26 @@
+local MODNAME = minetest.get_current_modname()
 local S = minetest.get_translator("iadiscordia")
 
---local def = table.copy(minetest.registered_items["default:apple"])
-local def = table.copy(minetest.registered_nodes["default:apple"])
-def.description     = S("Fancy Replica Apple")
-def.groups          =  {hard = 1, metal = 1,}
---def.tiles           = {"golden_apple.png",}
---def.overlay_tiles   = {}
---def.special_tiles   = {}
-def.wield_image     = "golden_apple.png"
-def.inventory_image = "golden_apple.png"
-def.on_use          = iadiscordia.on_use_generic -- engrave password on item then cast spell
---minetest.register_craftitem("iadiscordia:golden_apple", def)
--- TODO on place...
-minetest.register_node("iadiscordia:golden_apple", def)
+--
+-- Apples
+--
+
+iadiscordia.register_apple = function(name, description, image, on_use)
+	local def           = table.copy(minetest.registered_nodes["default:apple"])
+	def.description     = description
+	def.groups          =  {hard = 1, metal = 1,}
+	--def.tiles           = {image,}
+	--def.overlay_tiles   = {}
+	--def.special_tiles   = {}
+	def.wield_image     = image
+	def.inventory_image = image
+	def.on_use          = on_use
+	--minetest.register_craftitem(name, def)
+	-- TODO on place...
+	minetest.register_node(name, def)
+end
+
+iadiscordia.register_apple("iadiscordia:golden_apple", S("Fancy Replica Apple"), "golden_apple.png", iadiscordia.on_use_generic)
 
 local apple_mold_png = "apple_mold.png"
 minetest.register_craftitem("iadiscordia:apple_mold_raw", {
@@ -36,31 +44,103 @@ minetest.register_craftitem("iadiscordia:apple_mold_with_gold", {
 	inventory_image = apple_mold_png.."^[colorize:"..gold_tint..":"..opacity2
 })
 
-def = table.copy(def)
-def.description     = S("Replica Mythological Artifact")
-def.wield_image     = "kallisti.png"
-def.inventory_image = "kallisti.png"
-def.on_use          = iadiscordia.on_use -- write password in book then cast spell
---minetest.register_craftitem("iadiscordia:kallisti", def)
--- TODO on place...
-minetest.register_node("iadiscordia:kallisti", def)
+iadiscordia.register_apple("iadiscordia:kallisti", S("Replica Mythological Artifact"), "kallisti.png", iadiscordia.on_use)
 
-def = table.copy(minetest.registered_items["default:book"])
-def.description     = S("Chao De Jing")
-def.inventory_image = "[combine:64x64:0,0=default_book.png\\^\\[resize\\:64x64]:21,7=chao.png\\^\\[resize\\:23x23"
-def.on_use          = iadiscordia.on_use_node -- pencil password onto node then cast spell
--- TODO register node
-minetest.register_craftitem("iadiscordia:chao_de_jing", def)
+iadiscordia.register_replacement("iadiscordia:golden_apple", "iadiscordia:kallisti", "Hail Eris!")
+
+--
+-- Books
+--
+
+iadiscordia.register_book = function(name, description, image, on_use)
+	local def           = table.copy(minetest.registered_items["default:book"])
+	def.description     = description
+	def.inventory_image = "[combine:64x64:0,0=default_book.png\\^\\[resize\\:64x64]:21,7="..image.."\\^\\[resize\\:23x23"
+	def.on_use          = on_use
+	-- TODO register node
+	minetest.register_craftitem(name, def)
+end
+--local book_on_use = minetest.registered_items["default:book"].on_use
+iadiscordia.register_book("iadiscordia:manual", S("IA Discordia User Manual"), "kallisti.png", 
+
+function(itemstack, user, pointed_thing)
+	-- TODO tell player how to use the pointed_thing
+    	--local meta        = itemstack:get_meta()
+	--local title = meta:set_string("title", S("IA Discordia User Manual"))
+	--local text  = meta:set_string("text", S("Engrave a golden apple, then use it to get a Kallisti artifact.\nUse the Kallisti artifact on books to learn spells for the owner.\nUse the Chao De Jing on penciled nodes.\nUse engraved items on the Principia Discordia.")) -- TODO engraved items
+	--local owner = meta:set_string("owner")
+	--return book_on_use(itemstack, user, pointed_thing)
+end)
 
 minetest.register_craftitem("iadiscordia:sacred_chao_sticker", {
 	description     = S("Sacred Chao Sticker"),
 	inventory_image = "chao.png",
 })
 
--- TODO for use on players
-def = table.copy(minetest.registered_items["default:book"])
-def.description     = S("Principia Discordia")
-def.inventory_image = "[combine:64x64:0,0=default_book.png\\^\\[resize\\:64x64]:21,7=chaos_star.png\\^\\[resize\\:23x23"
+iadiscordia.register_book("iadiscordia:chao_de_jing", S("Chao De Jing"), "chao.png", iadiscordia.on_use_node)
+
+minetest.register_craftitem("iadiscordia:sacred_chao_sticker", {
+	description     = S("Sacred Chao Sticker"),
+	inventory_image = "chao.png",
+})
+
+iadiscordia.register_book("iadiscordia:principia_discordia", S("Principia Discordia"), "chaos_star.png", 
+-- TODO
+function(itemstack, user, pointed_thing)
+end)
+
+minetest.register_craftitem("iadiscordia:chaos_star_sticker", {
+	description     = S("Chaos Star Sticker"),
+	inventory_image = "chaos_star.png",
+})
+
+--
+-- Stones
+--
+
+-- TODO need a way to use engraved items on a magick item to check them and cast the spell
+--iadiscordia.register_replacement("default:paper", "iadiscordia:sacred_chao_sticker", "Chao")
+--iadiscordia.register_replacement("default:paper", "iadiscordia:chaos_star_sticker",  "Star")
+
+iadiscordia.register_stone = function(name, description, image, on_use)
+	local def           = table.copy(minetest.registered_items["default:mese_crystal"])
+	def.description     = description
+	--def.groups          =  {hard = 1, metal = 1,}
+	--def.tiles           = {image,}
+	--def.overlay_tiles   = {}
+	--def.special_tiles   = {}
+	def.wield_image     = image
+	def.inventory_image = image
+	def.on_use          = on_use
+	minetest.register_craftitem(name, def)
+	-- TODO on place...
+	--minetest.register_node(name, def)
+end
+iadiscordia.register_stone("iadiscordia:philosopher_stone", S("Salve et Coagula"), "stone.png", 
+-- TODO do alchemy on bones => set human trans flag on player
+-- => create philosopher's stone
+-- use philosopher's stone on player or bones => increment counter in stone
+-- 
+function(itemstack, user, pointed_thing)
+end)
+
+
+
+
+
+
+
+-- TODO walkable stone
+--iadiscordia.register_replacement("default:stone", "iadiscordia:stone",  "Star")
+
+-- TODO exploding trap
+-- TODO lodestone
+
+
+---- TODO for use on players
+--def = table.copy(minetest.registered_items["default:book"])
+--def.description     = S("Principia Discordia")
+--def.inventory_image = "[combine:64x64:0,0=default_book.png\\^\\[resize\\:64x64]:21,7=chaos_star.png\\^\\[resize\\:23x23"
 --def.on_use          = iadiscordia.on_use_node
 -- TODO register node
 --iadiscordia.get_connected_nodes = function(pos, param2, cnt)
@@ -111,7 +191,7 @@ def.inventory_image = "[combine:64x64:0,0=default_book.png\\^\\[resize\\:64x64]:
 --        end
 --        return list
 --    else
---        return nil
+--       k return nil
 --    end
 --end
 --function iadiscordia.avalanche(pos, cnt)
@@ -154,26 +234,5 @@ def.inventory_image = "[combine:64x64:0,0=default_book.png\\^\\[resize\\:64x64]:
 --
 --	return nil
 --end
-minetest.register_craftitem("iadiscordia:principia_discordia", def)
-
-minetest.register_craftitem("iadiscordia:chaos_star_sticker", {
-	description     = S("Chaos Star Sticker"),
-	inventory_image = "chaos_star.png",
-})
-
-
-
-iadiscordia.register_replacement("iadiscordia:golden_apple", "iadiscordia:kallisti", "Hail Eris!")
--- TODO need a way to use engraved items on a magick item to check them and cast the spell
---iadiscordia.register_replacement("default:paper", "iadiscordia:sacred_chao_sticker", "Chao")
---iadiscordia.register_replacement("default:paper", "iadiscordia:chaos_star_sticker",  "Star")
-
-
-
-
--- TODO walkable stone
---iadiscordia.register_replacement("default:stone", "iadiscordia:chaos_star_sticker",  "Star")
-
--- TODO exploding trap
--- TODO lodestone
+--minetest.register_craftitem("iadiscordia:principia_discordia", def)
 

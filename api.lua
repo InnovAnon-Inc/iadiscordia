@@ -1,3 +1,4 @@
+local MODNAME = minetest.get_current_modname()
 local S = minetest.get_translator("iadiscordia")
 
 iadiscordia.epic = core.settings:get "iadiscordia_epic" or 9000

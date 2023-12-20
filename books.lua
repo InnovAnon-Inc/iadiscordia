@@ -4,6 +4,7 @@
 	See LICENSE for more information ]]
 
 -- Translation support
+local MODNAME = minetest.get_current_modname()
 local S = minetest.get_translator("iadiscordia")
 local F = minetest.formspec_escape
 
