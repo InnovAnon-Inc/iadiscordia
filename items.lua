@@ -1,30 +1,61 @@
+-- TODO a couple books don't do anything
+-- TODO stone doesn't do anything
+-- TODO no way to craft stickers
+-- TODO no way to craft wand
+-- TODO need a magic item on which to use engraved items/tools
+
+
+
 local MODNAME = minetest.get_current_modname()
-local S = minetest.get_translator("iadiscordia")
+local S = minetest.get_translator(MODNAME)
 
 --
 -- Apples
 --
 
-iadiscordia.register_apple = function(name, description, image, on_use)
+iadiscordia.register_apple = function(name, description, image, on_use, magic)
+	assert(name ~= nil)
+	assert(description ~= nil)
+	assert(image ~= nil)
+	--assert(on_use ~= nil)
+	assert(magic ~= nil)
 	local def           = table.copy(minetest.registered_nodes["default:apple"])
+	--def.name = name
 	def.description     = description
-	def.groups          =  {hard = 1, metal = 1,}
-	--def.tiles           = {image,}
+	if magic then
+		def.groups          =  {dig_immediate=1, hard = 1, metal = 1, not_in_creative_inventory=1,}
+	else
+		def.groups          =  {dig_immediate=1, hard = 1, metal = 1,}
+	end
 	--def.overlay_tiles   = {}
 	--def.special_tiles   = {}
 	def.wield_image     = image
 	def.inventory_image = image
+	def.tiles           = {image,}
 	def.on_use          = on_use
-	--minetest.register_craftitem(name, def)
-	-- TODO on place...
+	if magic then
+		def.light_source    = minetest.LIGHT_MAX
+	end
+	def.after_place_node = function(pos, placer, itemstack)
+		minetest.set_node(pos, {name=name, param2=1})
+	end
+	--if magic then
+	--	def.after_dig_node = function(pos, oldnode, oldmetadata, digger)
+	--		--if oldnode.param2 == 0 then
+	--			--minetest.set_node(pos, {name="default:apple_mark"})
+	--			minetest.spawn_tree(pos, {"default:tree",})
+	--			minetest.remove_node(pos)
+	--		--end
+	--	end
+	--end
 	minetest.register_node(name, def)
 end
 
-iadiscordia.register_apple("iadiscordia:golden_apple", S("Fancy Replica Apple"), "golden_apple.png", iadiscordia.on_use_generic)
+iadiscordia.register_apple("iadiscordia:golden_apple", S("Fancy Replica Apple"), "golden_apple.png", iadiscordia.on_use_generic, false)
 
 local apple_mold_png = "apple_mold.png"
 minetest.register_craftitem("iadiscordia:apple_mold_raw", {
-	description = S("Clay Mold for Casting Apples (Raw)"),
+	description     = S("Clay Mold for Casting Apples (Raw)"),
 	inventory_image = apple_mold_png,
 })
 
@@ -33,18 +64,18 @@ local brown_tint = "#964B00"
 -- Opacity of said tint (0-255)
 local opacity    = 40
 minetest.register_craftitem("iadiscordia:apple_mold", {
-	description = S("Clay Mold for Casting Apples (Baked)"),
+	description     = S("Clay Mold for Casting Apples (Baked)"),
 	inventory_image = apple_mold_png.."^[colorize:"..brown_tint..":"..opacity
 })
 
 local gold_tint = "#d4af37"
 local opacity2  = 160
 minetest.register_craftitem("iadiscordia:apple_mold_with_gold", {
-	description = S("Clay Mold for Casting Apples (Ready)"),
+	description     = S("Clay Mold for Casting Apples (Ready)"),
 	inventory_image = apple_mold_png.."^[colorize:"..gold_tint..":"..opacity2
 })
 
-iadiscordia.register_apple("iadiscordia:kallisti", S("Replica Mythological Artifact"), "kallisti.png", iadiscordia.on_use)
+iadiscordia.register_apple("iadiscordia:kallisti", S("Replica Mythological Artifact"), "kallisti.png", iadiscordia.on_use, true)
 
 iadiscordia.register_replacement("iadiscordia:golden_apple", "iadiscordia:kallisti", "Hail Eris!")
 
@@ -52,13 +83,108 @@ iadiscordia.register_replacement("iadiscordia:golden_apple", "iadiscordia:kallis
 -- Books
 --
 
-iadiscordia.register_book = function(name, description, image, on_use)
+iadiscordia.register_book = function(name, description, image, on_use, magic)
+	assert(name ~= nil)
+	assert(description ~= nil)
+	assert(image ~= nil)
+	--assert(on_use ~= nil)
+	assert(magic ~= nil)
+	
 	local def           = table.copy(minetest.registered_items["default:book"])
+	--def.name = name
 	def.description     = description
 	def.inventory_image = "[combine:64x64:0,0=default_book.png\\^\\[resize\\:64x64]:21,7="..image.."\\^\\[resize\\:23x23"
 	def.on_use          = on_use
+
+	if magic then
+		def.groups          = {not_in_creative_inventory=1,}
+		def.light_source    = minetest.LIGHT_MAX
+	end
+
 	-- TODO register node
+	assert(iadiscordia.on_place_book ~= nil)
+	def.on_place = iadiscordia.on_place_book
+
 	minetest.register_craftitem(name, def)
+	iadiscordia.books[name]        = {
+		open      = name.."_open",
+		closed    = name.."_closed",
+	}
+	assert(iadiscordia.books[name] ~= nil)
+	assert(iadiscordia.books[name].open ~= nil)
+	iadiscordia.books[iadiscordia.books[name].open]   = {
+		base      = name,
+		closed    = iadiscordia.books[name].closed,
+		is_open   = true,
+	}
+	assert(iadiscordia.books[name].closed ~= nil)
+	iadiscordia.books[iadiscordia.books[name].closed] = {
+		base      = name,
+		open      = iadiscordia.books[name].open,
+		is_closed = true,
+	}
+
+	minetest.register_node(iadiscordia.books[name].open, {
+		description = description,
+		-- TODO correct images
+		--inventory_image = "default_book.png",
+		inventory_image = def.inventory_image,
+		tiles = {
+			"books_book_open_top.png",	-- Top
+			"books_book_open_bottom.png",	-- Bottom
+			"books_book_open_side.png",	-- Right
+			"books_book_open_side.png",	-- Left
+			"books_book_open_front.png",	-- Back
+			"books_book_open_front.png"	-- Front
+		},
+		drawtype = "nodebox",
+		paramtype = "light",
+		paramtype2 = "facedir",
+		sunlight_propagates = true,
+		node_box = {
+			type = "fixed",
+			fixed = {
+				{-0.375, -0.47, -0.282, 0.375, -0.4125, 0.282}, -- Top
+				{-0.4375, -0.5, -0.3125, 0.4375, -0.47, 0.3125},
+			}
+		},
+		--groups = {attached_node = 1}, -- FIXME
+		groups = {not_in_creative_inventory = 1},
+		on_punch = iadiscordia.on_punch_book,
+		on_rightclick = iadiscordia.on_rightclick_book,
+
+		light_source = def.light_source,
+	})
+	minetest.register_node(iadiscordia.books[name].closed, {
+		description = description,
+		--inventory_image = "default_book.png",
+		inventory_image = def.inventory_image,
+		tiles = {
+			"[combine:64x64:0,0=books_book_closed_topbottom.png\\^\\[resize\\:64x64]:21,14="..image.."\\^\\[resize\\:23x23",
+			--"books_book_closed_topbottom.png",	-- Top
+			"books_book_closed_topbottom.png",	-- Bottom
+			"books_book_closed_right.png",	-- Right
+			"books_book_closed_left.png",	-- Left
+			"books_book_closed_front.png^[transformFX",	-- Back
+			"books_book_closed_front.png"	-- Front
+		},
+		drawtype = "nodebox",
+		paramtype = "light",
+		paramtype2 = "facedir",
+		sunlight_propagates = true,
+		node_box = {
+			type = "fixed",
+			fixed = {
+				{-0.25, -0.5, -0.3125, 0.25, -0.35, 0.3125},
+			}
+		},
+		groups = {oddly_breakable_by_hand = 3, dig_immediate = 2, not_in_creative_inventory = 1}, --, attached_node = 1}, -- FIXME
+		on_dig = iadiscordia.on_dig_book,
+		on_rightclick = iadiscordia.on_rightclick_book,
+		after_place_node = iadiscordia.after_place_node_book,
+
+		light_source = def.light_source,
+	})
 end
 --local book_on_use = minetest.registered_items["default:book"].on_use
 iadiscordia.register_book("iadiscordia:manual", S("IA Discordia User Manual"), "kallisti.png", 
@@ -70,28 +196,25 @@ function(itemstack, user, pointed_thing)
 	--local text  = meta:set_string("text", S("Engrave a golden apple, then use it to get a Kallisti artifact.\nUse the Kallisti artifact on books to learn spells for the owner.\nUse the Chao De Jing on penciled nodes.\nUse engraved items on the Principia Discordia.")) -- TODO engraved items
 	--local owner = meta:set_string("owner")
 	--return book_on_use(itemstack, user, pointed_thing)
-end)
+end, true)
+
+iadiscordia.register_book("iadiscordia:chao_de_jing", S("Chao De Jing"), "chao.png", iadiscordia.on_use_node, true)
 
 minetest.register_craftitem("iadiscordia:sacred_chao_sticker", {
 	description     = S("Sacred Chao Sticker"),
 	inventory_image = "chao.png",
-})
-
-iadiscordia.register_book("iadiscordia:chao_de_jing", S("Chao De Jing"), "chao.png", iadiscordia.on_use_node)
-
-minetest.register_craftitem("iadiscordia:sacred_chao_sticker", {
-	description     = S("Sacred Chao Sticker"),
-	inventory_image = "chao.png",
+	groups          = {not_in_creative_inventory=1,},
 })
 
 iadiscordia.register_book("iadiscordia:principia_discordia", S("Principia Discordia"), "chaos_star.png", 
 -- TODO
 function(itemstack, user, pointed_thing)
-end)
+end, true)
 
 minetest.register_craftitem("iadiscordia:chaos_star_sticker", {
 	description     = S("Chaos Star Sticker"),
 	inventory_image = "chaos_star.png",
+	groups          = {not_in_creative_inventory=1,},
 })
 
 --
@@ -101,9 +224,16 @@ minetest.register_craftitem("iadiscordia:chaos_star_sticker", {
 -- TODO need a way to use engraved items on a magick item to check them and cast the spell
 --iadiscordia.register_replacement("default:paper", "iadiscordia:sacred_chao_sticker", "Chao")
 --iadiscordia.register_replacement("default:paper", "iadiscordia:chaos_star_sticker",  "Star")
+--iadiscordia.register_replacement("default:stick", "iadiscordia:wand",                "Wand")
 
-iadiscordia.register_stone = function(name, description, image, on_use)
-	local def           = table.copy(minetest.registered_items["default:mese_crystal"])
+iadiscordia.register_stick = function(name, description, image, on_use, magic)
+	assert(name ~= nil)
+	assert(description ~= nil)
+	assert(image ~= nil)
+	--assert(on_use ~= nil)
+	assert(magic ~= nil)
+	local def           = table.copy(minetest.registered_items["default:stick"])
+	--def.name = name
 	def.description     = description
 	--def.groups          =  {hard = 1, metal = 1,}
 	--def.tiles           = {image,}
@@ -112,15 +242,45 @@ iadiscordia.register_stone = function(name, description, image, on_use)
 	def.wield_image     = image
 	def.inventory_image = image
 	def.on_use          = on_use
+
+	if magic then
+		def.groups          = {not_in_creative_inventory=1,}
+		def.light_source    = minetest.LIGHT_MAX
+	end
+
+	--minetest.register_craftitem(name, def)
+	minetest.register_tool(name, def)
+	-- TODO on place...
+	--minetest.register_node(name, def)
+end
+iadiscordia.register_stick("iadiscordia:wand", S("Abracadabra"), "default_stick.png", iadiscordia.on_use_generic, true)
+
+iadiscordia.register_stone = function(name, description, image, on_use)
+	local def           = table.copy(minetest.registered_items["default:mese_crystal"])
+	--def.name = name
+	def.description     = description
+	--def.groups          =  {hard = 1, metal = 1,}
+	--def.tiles           = {image,}
+	--def.overlay_tiles   = {}
+	--def.special_tiles   = {}
+	def.wield_image     = image
+	def.inventory_image = image
+	def.on_use          = on_use
+
+	def.groups          = {not_in_creative_inventory=1,}
+	def.light_source    = minetest.LIGHT_MAX
+
 	minetest.register_craftitem(name, def)
 	-- TODO on place...
 	--minetest.register_node(name, def)
 end
 iadiscordia.register_stone("iadiscordia:philosopher_stone", S("Salve et Coagula"), "stone.png", 
--- TODO do alchemy on bones => set human trans flag on player
--- => create philosopher's stone
--- use philosopher's stone on player or bones => increment counter in stone
--- 
+
+-- transmutation circles => cast spells without all the guesswork
+-- human transmutation circle => set human trans flag on player
+-- how to create philosopher's stone ?
+-- use philosopher's stone to power transmutation circles
+-- use transmutation circle on human trans player => ascension
 function(itemstack, user, pointed_thing)
 end)
 

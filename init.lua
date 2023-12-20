@@ -8,9 +8,8 @@ dofile(path .. "util.lua")
 dofile(path .. "skills.lua")
 dofile(path .. "spells.lua")
 dofile(path .. "api.lua")
+dofile(path .. "books.lua")
 dofile(path .. "items.lua")
 dofile(path .. "crafts.lua")
--- TODO
---dofile(path .. "books.lua")
 
 print ("[MOD] IA Discordia loaded")
