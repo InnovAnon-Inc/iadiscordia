@@ -122,6 +122,26 @@ local function formspec_display(meta, player_name, pos)
 end
 
 iadiscordia.on_rightclick_book = function(pos, node, clicker, itemstack, pointed_thing)
+	if node.name == "iadiscordia:manual_open" then
+		local name = itemstack:get_name()
+		if name ~= "" then
+			local message = iadiscordia.manual[name] or S("Unrecognized item")
+			iadiscordia.chat_send_user(clicker, message)
+			local meta = minetest.get_meta(pos)
+			local player_name = clicker:get_player_name()
+			--if player_name == meta:get_string("owner") then
+				meta:set_string("title",     name)
+				meta:set_string("text",      message)
+				meta:set_string("owner",     clicker:get_player_name())
+				meta:set_string("infotext",  message)
+				meta:set_int   ("text_len",  message:len())
+				meta:set_int("page", 1)
+				meta:set_int("page_max", math.ceil((message:gsub("[^\n]", ""):len() + 1) / lpp))
+			--end
+			return nil
+		end
+	end
+
 	local book = iadiscordia.books[node.name]
 	if book.is_open then
 		print('book is open')

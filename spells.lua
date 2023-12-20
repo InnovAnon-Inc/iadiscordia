@@ -228,6 +228,11 @@ function iadiscordia.on_use(itemstack, user, pointed_thing)
 	--	iadiscordia.chat_send_user(user, S('Expecting an open book'))
 	--	return nil
 	--end
+	--if node.name == "iadiscordia:manual_open" then
+	--	local message = iadiscordia.manual[itemstack:get_name()] or S("Unrecognized item")
+	--	iadiscordia.chat_send_user(user, message)
+	--	return nil
+	--end
 
 	local meta  = minetest.get_meta(pos)
 	local title = meta:get_string("title")
@@ -245,5 +250,10 @@ function iadiscordia.on_use(itemstack, user, pointed_thing)
 		return nil
 	end
 
+	local random_mp  = iadiscordia.books[name].random_mp  or false
+	local random_hp  = iadiscordia.books[name].random_hp  or false
+	local random_xp  = iadiscordia.books[name].random_xp  or false
+	local random_lvl = iadiscordia.books[name].random_lvl or false
+	local random_cnt = iadiscordia.books[name].random_cnt or false
 	return iadiscordia.on_use_helper(itemstack, user, title, text, owner)
 end
