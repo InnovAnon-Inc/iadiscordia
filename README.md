@@ -30,6 +30,17 @@ IA Discordia Magick System
 - Magick books that are just like normal books
   except that they randomize parameters in the spellcasting computation
 - Suicide/dud spells (you don't know what a spell will do until you cast it... good luck)
+- Various spellcasting methods:
+  - "OG API"
+    - write in a book node; use a magick item on the book node
+      (salt `owner` is the book `owner`)
+    - `engrave` a magick item; use the magick item
+      (salt `owner` is the spellcaster)
+  - "Extended API"
+    - `engrave` a normal item; use the normal item on a magick node
+      (salt `owner` is the spellcaster)
+    - `pencil_redo` a normal node; use a magick item on the normal node
+      (salt `owner` is the spellcaster)
 
 ## How it works
 - Pay spell cost
