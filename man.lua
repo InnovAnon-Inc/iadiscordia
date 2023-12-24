@@ -1,5 +1,9 @@
+--
+-- In-game documentation system
+--
+
 local MODNAME = minetest.get_current_modname()
-local S = minetest.get_translator(MODNAME)
+local S       = minetest.get_translator(MODNAME)
 
 iadiscordia.manual = {
 	["iadiscordia:golden_apple"]         = S("Engrave then use to obtain Kallisti Artifact"),
@@ -30,6 +34,7 @@ iadiscordia.manual = {
 	["iamedusa:medusa"]                  = S("Don't look at it"),
 	["iadiscordia:fairy_bottle"]         = S("Keep it with you just in case"),
 	["default:copper_ingot"]             = S("TODO"),
+	-- TODO death note
 }
 iadiscordia.manual["iadiscordia:manual_open"]                = iadiscordia.manual["iadiscordia:manual"]
 iadiscordia.manual["iadiscordia:manual_closed"]              = iadiscordia.manual["iadiscordia:manual"]

@@ -1,5 +1,9 @@
+--
+-- Meta-file to include all spells
+--
+
 local MODNAME = minetest.get_current_modname()
-local path    = minetest.get_modpath(MODNAME) .. "/"
+local path    = minetest.get_modpath(MODNAME) .. "/magick/"
 local S       = minetest.get_translator(MODNAME)
 
 dofile(path .. "privs.lua")

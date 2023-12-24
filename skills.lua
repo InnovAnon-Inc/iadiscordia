@@ -1,3 +1,7 @@
+--
+-- Register magick skill with SF
+--
+
 local MODNAME = minetest.get_current_modname()
 SkillsFramework.define_skill({
 	mod="iadiscordia",

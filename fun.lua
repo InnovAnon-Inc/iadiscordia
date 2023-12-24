@@ -1,3 +1,7 @@
+--
+-- Easily register different spell types & shapes
+--
+
 local MODNAME = minetest.get_current_modname()
 local S = minetest.get_translator(MODNAME)
 

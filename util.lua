@@ -1,3 +1,7 @@
+--
+-- Utility function(s) copied from somewhere
+--
+
 local MODNAME = minetest.get_current_modname()
 function iadiscordia.chat_send_user(user, text)			
 	-- Check if user is a "fake player" (unofficial imitation of a the player data structure)

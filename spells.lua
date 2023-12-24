@@ -1,3 +1,7 @@
+--
+-- Spell-casting core / original API
+--
+
 -- TODO if player name is "wizard" then test/debug mode for that player
 -- TODO epic level offset
 -- TODO effective level should account for spell groups and specialization

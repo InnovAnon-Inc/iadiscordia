@@ -1,3 +1,7 @@
+--
+-- The original extended API
+--
+
 local MODNAME = minetest.get_current_modname()
 local S = minetest.get_translator("iadiscordia")
 

@@ -1,3 +1,7 @@
+--
+-- Recipes for our items
+--
+
 local MODNAME = minetest.get_current_modname()
 minetest.register_craft({
    type         = "cooking",
@@ -107,5 +111,7 @@ minetest.register_craft({
       'default:book_written',             -- 9
   },
 })
+
+-- TODO death note recipe
 
 -- TODO burnable books

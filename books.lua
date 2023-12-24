@@ -1,3 +1,7 @@
+--
+-- Copied from `books`
+--
+
 --[[ Placeable Books by everamzah
 	Copyright (C) 2016 James Stevenson
 	LGPLv2.1+
