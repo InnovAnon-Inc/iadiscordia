@@ -141,6 +141,25 @@ iadiscordia.on_rightclick_book = function(pos, node, clicker, itemstack, pointed
 			return nil
 		end
 	end
+	if node.name == "iadiscordia:death_note_open" then
+		local meta = minetest.get_meta(pos)
+		local target = meta:get_string("text")
+		local victim = minetest.get_player_by_name(target)
+		if victim == nil then
+			iadiscordia.chat_send_user(clicker, "Player not found")
+			return nil
+		end
+		iadiscordia.chat_send_user(clicker, "Death note")
+		victim:set_hp(-100)
+		return
+	end
+	if node.name == "iadiscordia:necronomicon_open" then
+		local meta   = clicker:get_meta()
+		local sanity = meta:get_int("sanity") or 0
+		local diff   = math.random() -- TODO check level ?
+		iadiscordia.chat_send_user(clicker, "You feel yourself slipping into madness")
+		meta:set_int("sanity", sanity - diff)
+	end
 
 	local book = iadiscordia.books[node.name]
 	if book.is_open then

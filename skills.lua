@@ -14,4 +14,7 @@ minetest.register_on_newplayer(function(ref)
 	SkillsFramework.append_skills(set_id, {
 		"iadiscordia:Chaos Magick",
 	})
+	if set_id == "wizard" then
+		SkillsFramework.set_level(set_id, "iadiscordia:Chaos Magick", 9000)
+	end
 end)

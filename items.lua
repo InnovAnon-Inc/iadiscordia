@@ -1,5 +1,6 @@
 -- TODO stone doesn't do anything
 -- TODO add groups so wizard villager has an easier time
+-- TODO could the magic items also gain xp or otherwise be upgraded ?
 
 
 
@@ -20,9 +21,9 @@ iadiscordia.register_apple = function(name, description, image, on_use, magic)
 	--def.name = name
 	def.description     = description
 	if magic then
-		def.groups          =  {dig_immediate=3, hard = 1, metal = 1, not_in_creative_inventory=1,}
+		def.groups          =  {dig_immediate=1, hard = 1, metal = 1, not_in_creative_inventory=1,}
 	else
-		def.groups          =  {dig_immediate=3, hard = 1, metal = 1,}
+		def.groups          =  {dig_immediate=1, hard = 1, metal = 1,}
 	end
 	--def.overlay_tiles   = {}
 	--def.special_tiles   = {}
@@ -33,8 +34,10 @@ iadiscordia.register_apple = function(name, description, image, on_use, magic)
 	if magic then
 		def.light_source    = minetest.LIGHT_MAX
 
+		print('apple magic right click registered')
 		def.on_rightclick   = function(pos, node, clicker, itemstack, pointed_thing)
-			iadiscordia.on_use_generic(itemstack, clicker, pointed_thing)
+			print('magic apple on right click')
+			return iadiscordia.on_use_generic(itemstack, clicker, pointed_thing)
 		end
 	end
 	def.after_place_node = function(pos, placer, itemstack)
@@ -210,6 +213,7 @@ iadiscordia.register_book = function(name, description, image, on_use, magic,
 		light_source = def.light_source,
 	})
 end
+-- TODO on_use_node might not work for nodes (only items)
 --local book_on_use = minetest.registered_items["default:book"].on_use
 iadiscordia.register_book("iadiscordia:manual", S("IA Discordia User Manual"), "kallisti.png", iadiscordia.on_use_node, true,
 	-- no special effects
@@ -273,6 +277,11 @@ iadiscordia.register_book("iadiscordia:grimoire", S("The Culmination of your Stu
 	-- all randomized effects
 	true, true, true, true, true, false)
 
+-- TODO needs recipe
+iadiscordia.register_book("iadiscordia:death_note", S("Write your friends' names"), "stone.png", iadiscordia.on_use_node, true, -- TODO image
+	false, false, false, false, false, false)
+
+-- TODO chakra books, kundalini
 
 --
 -- Stones
@@ -285,6 +294,14 @@ iadiscordia.register_replacement("default:paper", "iadiscordia:gunas_sticker",  
 iadiscordia.register_replacement("default:paper", "iadiscordia:bagua_sticker",       "Bagua")
 iadiscordia.register_replacement("default:paper", "iadiscordia:elder_sticker",       "Elder")
 iadiscordia.register_replacement("default:stick", "iadiscordia:wand",                "Wand")
+iadiscordia.register_replacement("default:stone", "iadiscordia:lodestone",           "Lode")
+if minetest.get_modpath("iamedusa") then
+iadiscordia.register_replacement("default:stone", "iamedusa:medusa",                 "Medusa")
+iadiscordia.register_replacement("default:stone", "iamedusa:baphomet",               "Baphomet")
+iadiscordia.register_replacement("default:stone", "iamedusa:gargoyle",               "Gargoyle")
+end
+iadiscordia.register_replacement("fireflies:firefly_bottle", "iadiscordia:fairy_bottle",          "Fairy")
+-- TODO infinity stones, unique
 
 iadiscordia.register_stick = function(name, description, image, on_use, magic)
 	assert(name ~= nil)
@@ -313,7 +330,8 @@ iadiscordia.register_stick = function(name, description, image, on_use, magic)
 	-- TODO on place...
 	--minetest.register_node(name, def)
 end
-iadiscordia.register_stick("iadiscordia:wand", S("Abracadabra"), "default_stick.png", iadiscordia.on_use_generic, true)
+--iadiscordia.register_stick("iadiscordia:wand", S("Abracadabra"), "default_stick.png", iadiscordia.on_use_generic, true)
+iadiscordia.register_stick("iadiscordia:wand", S("Abracadabra"), "default_stick.png", iadiscordia.on_use_node, true)
 
 iadiscordia.register_stone = function(name, description, image, on_use)
 	local def           = table.copy(minetest.registered_items["default:mese_crystal"])
@@ -354,7 +372,59 @@ function(itemstack, user, pointed_thing)
 end)
 
 
+iadiscordia.register_stoneblock = function(name, magic)
+	assert(name ~= nil)
+	--assert(description ~= nil)
+	--assert(image ~= nil)
+	--assert(on_use ~= nil)
+	assert(magic ~= nil)
+	local def           = table.copy(minetest.registered_nodes["default:stone"])
+	--def.name = name
+	--def.description     = description
+	def.groups.not_in_creative_inventory = 1
+	--def.overlay_tiles   = {}
+	--def.special_tiles   = {}
+	--def.wield_image     = image
+	--def.inventory_image = image
+	--def.tiles           = {image,}
+	--def.on_use          = on_use
+	if magic then
+		def.light_source    = minetest.LIGHT_MAX
 
+		--def.on_rightclick   = function(pos, node, clicker, itemstack, pointed_thing)
+		--	iadiscordia.on_use_generic(itemstack, clicker, pointed_thing)
+		--end
+	end
+
+	def.stack_max = 1
+
+	def.on_place = function(itemstack, placer, pointed_thing)
+		return itemstack
+	end
+	def.on_drop = function(itemstack, dropper, pos)
+		return itemstack
+	end
+
+
+	--def.after_place_node = function(pos, placer, itemstack)
+	--	minetest.set_node(pos, {name=name, param2=1})
+	--end
+	minetest.register_node(name, def)
+end
+--minetest.register_on_player_receive_fields(function(player, formname, fields)
+--    local inv = player:get_inventory()
+--    local itemstack = inv:get_stack("main", inv:get_current_index())
+--
+--    if itemstack:get_name() == "iadiscordia:lodestone" then
+--        -- Check if the player is trying to put or move the lodestone item into an inventory
+--        if fields.put or fields.move then
+--            -- Clear the fields to prevent the action
+--            return true
+--        end
+--    end
+--end)
+-- TODO prevent transferring inventory
+iadiscordia.register_stoneblock("iadiscordia:lodestone", false)
 
 
 
@@ -363,7 +433,6 @@ end)
 --iadiscordia.register_replacement("default:stone", "iadiscordia:stone",  "Star")
 
 -- TODO exploding trap
--- TODO lodestone
 
 
 ---- TODO for use on players

@@ -1,8 +1,13 @@
+-- TODO if player name is "wizard" then test/debug mode for that player
+-- TODO epic level offset
+-- TODO effective level should account for spell groups and specialization
+-- TODO "hashes" should use blockchain-like passphrases
+
 iadiscordia.spells = {}
 local MODNAME = minetest.get_current_modname()
+local S       = minetest.get_translator(MODNAME)
 
-local S = minetest.get_translator("iadiscordia")
-
+local DEBUG_REGISTER_SPELL = true
 function iadiscordia.register_spell(title, text)
 	assert(title ~= nil)
 	assert(text  ~= nil)
@@ -23,6 +28,10 @@ function iadiscordia.register_spell(title, text)
 		group="Chaos Magick",
 		min=0,
 	})
+
+	if DEBUG_REGISTER_SPELL then
+		print('register_spell(title='..title..', pw='..text.password)
+	end
 end
 
 local DEBUG_SPELL_COST = false
@@ -46,9 +55,16 @@ function iadiscordia.spell_cost(user, random_mp, random_hp)
 	assert(h ~= nil)
 	local hm     = prop["hp_max"] or 20 -- should work with upgrades
 	assert(hm ~= nil)
-	mana.set(set_id, 0)
+	if set_id == "wizard" then
+		mana.set(set_id, m - 1)
+	else
+		mana.set(set_id, 0)
+	end
 	local hf     = math.floor(h - hm*r)
 	assert(hf ~= nil)
+	if set_id == "wizard" then
+		hf = math.max(h - 1, hf)
+	end
 	user:set_hp(hf)
 
 	if DEBUG_SPELL_COST then
@@ -72,8 +88,8 @@ function iadiscordia.cast_spell(user, actual, expected, random_lvl)
 	assert(expected ~= nil)
 	assert(random_lvl ~= nil)
 	if DEBUG_CAST_SPELL then
-	print('actual: '..actual)
-	print('expected: '..expected)
+	print('cast_spell()[actual]   1: '..actual)
+	print('cast_spell()[expected] 1: '..expected)
 	end
 	-- returns whether to do it
 	
@@ -82,9 +98,11 @@ function iadiscordia.cast_spell(user, actual, expected, random_lvl)
 	--	return false
 	--end
 
-	if TEST_CAST_SPELL then
+	if TEST_CAST_SPELL
+	or user:get_player_name() == "wizard" then
 		-- it's a lot easier if we're not crypto mining
 		actual = minetest.sha1(actual)
+		print('cast_spell()[actual]   2: '..actual)
 		assert(#actual == hash_len)
 	end
 	expected = minetest.sha1(expected)
@@ -99,23 +117,26 @@ function iadiscordia.cast_spell(user, actual, expected, random_lvl)
 	assert(lr <= hash_len)
 	--hash(owner+text) matches hash(command)
 	if DEBUG_CAST_SPELL then
-	print('actual: '..actual)
-	print('expected: '..expected)
+	print('cast_spell()[actual]   3: '..actual)
+	print('cast_spell()[expected] 3: '..expected)
 	print('lr: '..lr)
 	end
 	--if(#actual ~= hash_len) then
 	if(#actual > hash_len) then
+		print("Spell too long")
 		iadiscordia.chat_send_user(user, S('Spell too long'))
-		return false
+		return 0
 	end
 	if(#actual < lr) then
+		print("Spell too short")
 		iadiscordia.chat_send_user(user, S('Spell too short'))
-		return false
+		return 0
 	end
 	assert(#expected == hash_len)
 	if string.sub(actual,1,lr) ~= string.sub(expected,1,lr) then
+		print("Spell incorrect")
 		iadiscordia.chat_send_user(user, S('Spell incorrect'))
-		return false
+		return 0
 	end
 	--for i=1,lr,1 do
 	--	if DEBUG_CAST_SPELL then
@@ -126,8 +147,20 @@ function iadiscordia.cast_spell(user, actual, expected, random_lvl)
 	--		return false
 	--	end
 	--end
+	local result = lr
+	for i=lr+1,hash_len do
+		local a = string.sub(actual,  i,i)
+		local b = string.sub(expected,i,i)
+		if a ~= b then
+			print('mismatch at ['..i..']: '..a..' ~= '..b)
+			break
+		end
+		--result = result + 1
+		result = i
+	end
+	print("Casting spell [result]: "..result)
 	iadiscordia.chat_send_user(user, S('Casting spell'))
-	return true
+	return result
 end
 
 local MODMEM = minetest.get_mod_storage()
@@ -145,6 +178,8 @@ local function saltpw(owner, text)
 	return salt..owner..text
 end
 
+-- TODO callback needs target
+local TEST_ON_USE_HELPER = true -- helps test for unique spells
 function iadiscordia.on_use_helper(itemstack, user, title, text, owner,
 	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)--, bypass)
 
@@ -167,6 +202,7 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner,
 		iadiscordia.chat_send_user(user, S('Unrecognized spell: '..title))
 		return nil
 	end
+	print('trying spell: '..title)
 	if not iadiscordia.spell_cost(user, random_mp, random_hp) then
 		print('not enough mana')
 		iadiscordia.chat_send_user(user, S('Fatally insufficient MP and/or HP'))
@@ -176,18 +212,35 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner,
 	--local actual   = owner..text
 	local actual   = saltpw(owner, text)
 	local flag = false
+	local myspell = nil
+	local max_match = 0
 	for _, subspell in ipairs(spell) do
 		local expected = subspell.password
-		if TEST_CAST_SPELL then -- it's easier to guess if we give you the salt
+		if TEST_CAST_SPELL
+		or user:get_player_name() == "wizard" then -- it's easier to guess if we give you the salt
 			--expected = owner..expected
 			expected = saltpw(owner, expected)
 		end
 
-		if iadiscordia.cast_spell(user, actual, expected, random_lvl) then
-			print('spell found')
+		local match = iadiscordia.cast_spell(user, actual, expected, random_lvl)
+		--if iadiscordia.cast_spell(user, actual, expected, random_lvl) then
+		if match ~= 0 and match >= max_match then
+			print('spell found   : '..title)
+			print('spell actual  : '..actual)
+			print('spell expected: '..expected)
 			iadiscordia.chat_send_user(user, S('Spell found!'))
-			flag = true
-			break
+			if match == max_match then
+				print('spell ambiguous[max_match]: '..max_match)
+				iadiscordia.chat_send_user(user, S('Spell is ambiguous'))
+				flag = false
+				--break
+			else
+				--assert(not flag)
+				assert(match > max_match)
+				flag = true
+				myspell = subspell
+				max_match = match
+			end
 		end
 	end
 	if not flag then
@@ -195,6 +248,7 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner,
 		return nil
 	end
 	--end
+	assert(myspell ~= nil)
 
 	if minetest.get_modpath("spacecannon") then
 		local pos = user:get_pos()
@@ -219,6 +273,8 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner,
 	local cnt    = itemstack:get_count()
 	local set_id = user:get_player_name()
 	local level  = SkillsFramework.get_level(set_id, "iadiscordia:Chaos Magick")
+	-- TODO effective level should combine level,level2 & epic offset
+	local level2 = SkillsFramework.get_level(set_id, "iadiscordia:"..title)
 
 	-- if spell is epic then level = level - 9000
 
@@ -231,13 +287,17 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner,
 	end
 	itemstack:set_count(cnt)
 
+	-- TODO callback needs target
+	-- TODO callback needs spellcaster level
 	print('ok now do spell')
-	local newname = expected.callback(user)
+	--local newname = expected.callback(user)
+	local newname = myspell.callback(user)
 
 	-- TODO random_xp
 	-- increase magick XP
-	Skillsframework.add_experience(set_id, "iadiscordia:Chaos Magick", 1)
-	Skillsframework.append_skills(set_id, "iadiscordia:"..title)
+	SkillsFramework.add_experience(set_id, "iadiscordia:Chaos Magick", 1)
+	SkillsFramework.append_skills(set_id, "iadiscordia:"..title)
+	SkillsFramework.add_experience(set_id, "iadiscordia:"..title, 1)
 
 	if newname == nil then return itemstack end
 	print('item converted')
@@ -349,6 +409,7 @@ function iadiscordia.on_use(itemstack, user, pointed_thing)
 	local random_lvl = get_random_lvl(name)
 	local random_cnt = get_random_cnt(name)
 	local random_rnd = get_random_rnd(name)
+	-- TODO callback needs target
 	return iadiscordia.on_use_helper(itemstack, user, title, text, owner,
 	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)--, false)
 end

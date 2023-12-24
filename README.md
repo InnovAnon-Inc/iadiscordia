@@ -28,6 +28,8 @@ TODO
 - on_use_node should allow to replace or alter node
 - a magick item to act on players instead of nodes
 - recipes for the stickers
+- add wear to items
+- potions, scrolls, magic circles, specific wands
 
 [luacheck badge]: https://github.com/InnovAnon-Inc/iadiscordia/workflows/luacheck/badge.svg
 [luacheck workflow]: https://github.com/InnovAnon-Inc/iadiscordia/actions?query=workflow%3Aluacheck
