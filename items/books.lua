@@ -28,7 +28,7 @@ iadiscordia.register_book = function(name, description, image, on_use, magic,
 	def.on_use          = on_use
 
 	if magic then
-		def.groups          = {not_in_creative_inventory=1,}
+		def.groups          = {not_in_creative_inventory=1, spellbook=1,}
 		def.light_source    = minetest.LIGHT_MAX
 	end
 

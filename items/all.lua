@@ -9,7 +9,7 @@ local path    = minetest.get_modpath(MODNAME) .. "/items/"
 local S       = minetest.get_translator(MODNAME)
 
 dofile(path .. "apples.lua")
-dofile(path .. "book.lua")
+dofile(path .. "books.lua")
 dofile(path .. "stones.lua")
 dofile(path .. "sticks.lua")
 

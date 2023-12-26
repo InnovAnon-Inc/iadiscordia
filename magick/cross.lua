@@ -5,6 +5,30 @@
 local MODNAME = minetest.get_current_modname()
 local S       = minetest.get_translator(MODNAME)
 
+local golden_apple       = "iadiscordia:golden_apple"
+local kallisti           = "iadiscordia:kallisti"
+local stick              = "default:stick"
+local apple              = "default:apple"
+local bucket_water       = "bucket:bucket_water"
+local bucket_empty       = "bucket:bucket_empty"
+local bucket_river_water = "bucket:bucket_river_water"
+local bucket_lava        = "bucket:lava"
+local mese_crystal       = "default:mese_crystal"
+local obsidian_shard     = "default:obsidian_shard"
+local diamond            = "default:diamond"
+local gold_lump          = "default:gold_lump"
+local torch              = "default:torch"
+local ice                = "default:ice"
+local basic_flame        = "fire:basic_flame"
+local ice_slab           = "stairs:slab_ice"
+local poop_turd          = "pooper:poop_turd"
+local poop_pile          = "pooper:poop_pile"
+
+local apple_rad          = 5
+local rps_duration       = 30
+local flood_rad          = 10
+local bonemeal_rad       = 10
+
 if  minetest.get_modpath("church_cross")
 and minetest.get_modpath("iadecor") then
 	-- TODO other crosses

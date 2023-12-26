@@ -84,7 +84,7 @@ function iadiscordia.spell_cost(user, random_mp, random_hp)
 end
 
 local DEBUG_CAST_SPELL = true
-local TEST_CAST_SPELL  = true
+local TEST_CAST_SPELL  = false
 local hash_len         = 40
 function iadiscordia.cast_spell(user, actual, expected, random_lvl)
 	assert(user ~= nil)
@@ -102,13 +102,15 @@ function iadiscordia.cast_spell(user, actual, expected, random_lvl)
 	--	return false
 	--end
 
-	if TEST_CAST_SPELL
-	or user:get_player_name() == "wizard" then
+	--if TEST_CAST_SPELL
+	--or user:get_player_name() == "wizard" then
 		-- it's a lot easier if we're not crypto mining
 		actual = minetest.sha1(actual)
 		print('cast_spell()[actual]   2: '..actual)
 		assert(#actual == hash_len)
-	end
+	--else
+		-- TODO just the owner should be hashed ?
+	--end
 	expected = minetest.sha1(expected)
 
 	local set_id = user:get_player_name()
@@ -175,7 +177,7 @@ if salt == nil then
 	MODMEM:set_int("salt", seed)
 end
 
-local function saltpw(owner, text)
+function iadiscordia.saltpw(owner, text)
 	assert(owner ~= nil)
 	assert(text  ~= nil)
 	--return minetest.get_worldpath()..salt..owner..text
@@ -214,7 +216,7 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner,
 	end
 	--if not bypass then
 	--local actual   = owner..text
-	local actual   = saltpw(owner, text)
+	local actual   = iadiscordia.saltpw(owner, text)
 	local flag = false
 	local myspell = nil
 	local max_match = 0
@@ -223,7 +225,7 @@ function iadiscordia.on_use_helper(itemstack, user, title, text, owner,
 		if TEST_CAST_SPELL
 		or user:get_player_name() == "wizard" then -- it's easier to guess if we give you the salt
 			--expected = owner..expected
-			expected = saltpw(owner, expected)
+			expected = iadiscordia.saltpw(owner, expected)
 		end
 
 		local match = iadiscordia.cast_spell(user, actual, expected, random_lvl)
