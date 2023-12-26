@@ -88,6 +88,13 @@ vertically integrating with the `biofuel` mod, the fuelcrafting `working_village
 - add wear to items
 - potions, scrolls, magic circles, specific wands
 
+## Easter Eggs
+- Player named "wizard"
+  - starts at epic level
+  - spells cost 1 MP, 1 HP
+  - expected plaintext is salted with his name
+    => he writes his spells in plaintext without worry about the hashing
+
 [luacheck badge]: https://github.com/InnovAnon-Inc/iadiscordia/workflows/luacheck/badge.svg
 [luacheck workflow]: https://github.com/InnovAnon-Inc/iadiscordia/actions?query=workflow%3Aluacheck
 
