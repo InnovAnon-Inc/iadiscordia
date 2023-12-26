@@ -87,6 +87,7 @@ vertically integrating with the `biofuel` mod, the fuelcrafting `working_village
 - recipes for the stickers
 - add wear to items
 - potions, scrolls, magic circles, specific wands
+- server-specific spell-storage to enable spells like: grant me a badge via a rest api (technically a consumable item that contains the elevated perms in another mod)
 
 ## Easter Eggs
 - Player named "wizard"
