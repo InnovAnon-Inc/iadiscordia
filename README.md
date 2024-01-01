@@ -11,13 +11,17 @@ IA Discordia Magick System
 - Use the craftitems on books and see what happens 3:)
 - How spells work:
   - Player must write a title and text.
-    It would appear that the title is necessary to save the text.
-    The title is not otherwise used by the mod.
+    The title is the name of the spell.
   - Spell formula is expected spell text salted with the book owner and hashed.
   - Player must correctly guess some number of hash digits for spell success,
     depending on Chaos Magick skill.
+  - Now supporting spells with same title, different formulae => different results
 - Spells sold separately.
 
+TODO
+- on_use_node should allow to replace or alter node
+- a magick item to act on players instead of nodes
+- recipes for the stickers
 
 [luacheck badge]: https://github.com/InnovAnon-Inc/iadiscordia/workflows/luacheck/badge.svg
 [luacheck workflow]: https://github.com/InnovAnon-Inc/iadiscordia/actions?query=workflow%3Aluacheck
