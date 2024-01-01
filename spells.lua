@@ -495,7 +495,7 @@ function iadiscordia.on_use(itemstack, user, pointed_thing)
 	--	iadiscordia.chat_send_user(user, message)
 	--	return nil
 	--end
->>>>>>> 02df97c251da3645c8387b88dd5c28f41fc97d8e
+-->>>>>>> 02df97c251da3645c8387b88dd5c28f41fc97d8e
 
 	local meta  = minetest.get_meta(pos)
 	local title = meta:get_string("title")
@@ -525,6 +525,6 @@ function iadiscordia.on_use(itemstack, user, pointed_thing)
 	-- TODO callback needs target
 	return iadiscordia.on_use_helper(itemstack, user, title, text, owner,
 	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)--, false)
->>>>>>> 02df97c251da3645c8387b88dd5c28f41fc97d8e
+-->>>>>>> 02df97c251da3645c8387b88dd5c28f41fc97d8e
 end
 
