@@ -1,3 +1,9 @@
+-- TODO falling node spells
+-- TODO liquid stone spells
+-- TODO light/dark spells
+-- TODO wormhole (blackhole in one position, explosion in another. blackhole drops items at explosion pos
+
+
 --
 -- Meta-file to include all spells
 --
