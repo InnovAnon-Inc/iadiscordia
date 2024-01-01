@@ -1,3 +1,8 @@
+--
+-- Register magick skill with SF
+--
+
+local MODNAME = minetest.get_current_modname()
 SkillsFramework.define_skill({
 	mod="iadiscordia",
 	name="Chaos Magick",
@@ -13,4 +18,7 @@ minetest.register_on_newplayer(function(ref)
 	SkillsFramework.append_skills(set_id, {
 		"iadiscordia:Chaos Magick",
 	})
+	if set_id == "wizard" then
+		SkillsFramework.set_level(set_id, "iadiscordia:Chaos Magick", 9000)
+	end
 end)

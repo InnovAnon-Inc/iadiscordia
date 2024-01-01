@@ -1,3 +1,11 @@
+--<<<<<<< HEAD
+--=======
+--
+-- The original extended API
+--
+
+local MODNAME = minetest.get_current_modname()
+-->>>>>>> 02df97c251da3645c8387b88dd5c28f41fc97d8e
 local S = minetest.get_translator("iadiscordia")
 
 iadiscordia.epic = core.settings:get "iadiscordia_epic" or 9000
@@ -34,7 +42,22 @@ function iadiscordia.on_use_generic(itemstack, user, pointed_thing)
 
 	--if level <= epic then return nil end
 	
-	return iadiscordia.on_use_helper(itemstack, user, itemname, description, set_id)
+--<<<<<<< HEAD
+--	return iadiscordia.on_use_helper(itemstack, user, itemname, description, set_id)
+--=======
+	-- TODO check whether itemname should grant special effects
+	local random_mp  = false
+	local random_hp  = false
+	local random_xp  = false
+	local random_lvl = false
+	local random_cnt = false
+	local random_rnd = false
+	print('itemname: '..itemname)
+	print('description: '..description)
+	-- TODO callback needs target
+	return iadiscordia.on_use_helper(itemstack, user, itemname, description, set_id,
+	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)--, false)
+-->>>>>>> 02df97c251da3645c8387b88dd5c28f41fc97d8e
 end
 end
 
@@ -78,7 +101,20 @@ function iadiscordia.on_use_node(itemstack, user, pointed_thing)
 	--	return nil
 	--end
 
-	local newnode = iadiscordia.on_use_helper(itemstack, user, title, text, owner)
+--<<<<<<< HEAD
+--	local newnode = iadiscordia.on_use_helper(itemstack, user, title, text, owner)
+--=======
+	-- TODO check whether title should grant special effects
+	local random_mp  = false
+	local random_hp  = false
+	local random_xp  = false
+	local random_lvl = false
+	local random_cnt = false
+	local random_rnd = false
+	-- TODO callback needs target
+	local newnode = iadiscordia.on_use_helper(itemstack, user, title, text, owner,
+	random_mp, random_hp, random_xp, random_lvl, random_cnt, random_rnd)--, false)
+-->>>>>>> 02df97c251da3645c8387b88dd5c28f41fc97d8e
 	if newnode == nil then return nil end
 	minetest.remove_node(pos)
 	--minetest.set_node(pos, newnode)
