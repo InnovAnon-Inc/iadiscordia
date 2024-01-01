@@ -12,6 +12,7 @@ dofile(path .. "apples.lua")
 dofile(path .. "books.lua")
 dofile(path .. "stones.lua")
 dofile(path .. "sticks.lua")
+dofile(path .. "air.lua")
 
 
 iadiscordia.register_replacement("fireflies:firefly_bottle", "iadiscordia:fairy_bottle",          "Fairy")
