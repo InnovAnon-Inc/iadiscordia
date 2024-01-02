@@ -668,6 +668,121 @@ end
 
 
 
+
+
+
+
+
+
+
+
+
+
+-- TODO
+--def = minetest.registered_nodes[air]
+--def = table.copy(def)
+--def.description = S("Midas")
+--def.walkable = false
+--def.groups.air = 1
+--def.drowning = 1
+--minetest.register_node(MODNAME..":midas", def)
+--if true then
+--minetest.register_abm({
+--	label     = "All that Glitters is Gold",
+--	nodenames = {MODNAME..":midas",},
+--	--neighbors = {"air",},
+--	interval  = 1.0,
+--	chance    = 1,
+--	--catch_up  = true,
+--	action    = function(
+--		pos, node, active_object_count, active_object_count_wider)
+--
+--		local np = minetest.find_node_near(pos, 1, {"air",})
+--		if np ~= nil then
+--			minetest.set_node(np, {name=MODNAME..":midas",})
+--			return
+--		end
+--
+--		np = minetest.find_node_near(pos, 1, {MODNAME..":midas",})
+--		if np ~= nil then
+--			minetest.set_node(np, {name="default:goldblock",})
+--			return
+--		end
+--	end,
+--})
+--end
+
+
+-- TODO
+--def = minetest.registered_nodes[air]
+--def = table.copy(def)
+--def.description = S("Sands of Time")
+--def.walkable = false
+--def.groups.air = 1
+--minetest.register_node(MODNAME..":allsands", def)
+--if true then
+--minetest.register_abm({
+--	label     = "Foundation of Sand",
+--	nodenames = {
+--		"group:soil",
+--		"group:stone",
+--		"default:gravel", "default:cobble", "default:cobblestone",
+--		"default:stone_brick",
+--		"default:desert_stone_brick",
+--		"default:desert_sandstone_brick",
+--	},
+--	neighbors = {MODNAME..":allsands",},
+--	interval  = 1.0,
+--	chance    = 1,
+--	--catch_up  = true,
+--	action    = function(
+--		pos, node, active_object_count, active_object_count_wider)
+--
+--		minetest.set_node(pos, {name="default:sand",})
+--			return
+--	end,
+--})
+--minetest.register_abm({
+--	label     = "Sands of Time",
+--	nodenames = {MODNAME..":allsands",},
+--	neighbors = {"group:air",},
+--	interval  = 1.0,
+--	chance    = 1,
+--	--catch_up  = true,
+--	action    = function(
+--		pos, node, active_object_count, active_object_count_wider)
+--		local n = minetest.get_node(pos)
+--		if n.name ~= MODNAME..":allsands" then
+--			minetest.swap_node(pos, {name=MODNAME..":allsands",})
+--		end
+--	end,
+--})
+--end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 local function register_liquid(liquid_name, liquid_desc)
 -- TODO param/param2
 local stone = "default:"..liquid_name -- stone"
