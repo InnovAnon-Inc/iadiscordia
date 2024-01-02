@@ -155,15 +155,15 @@ minetest.register_abm({
 					local node = minetest.get_node(p)
 					local name = node.name
 					if name ~= MODNAME..":gravity" then
-					if name == "air" then
-						minetest.set_node(p, {name=MODNAME..":gravity",})
-						return
-					elseif minetest.spawn_falling_node(p) then
-						return
-					--elseif not minetest.spawn_falling_node(p) then
-					--elseif not minetest.dig_node(p) then
-						-- really hard to move
-					end
+						if minetest.spawn_falling_node(p) then
+							return
+						--elseif not minetest.spawn_falling_node(p) then
+						--elseif not minetest.dig_node(p) then
+							-- really hard to move
+						elseif name == "air" then
+							minetest.set_node(p, {name=MODNAME..":gravity",})
+							return
+						end
 					end
 				end
 			end
@@ -192,7 +192,7 @@ local decay = {
 	["default:water_source"]                = "air",
 	["default:river_water_source"]          = "air",
 	["default:ice"]                         = "water_source",
-	["default:snow"]                        = "water_source",
+	["default:snowblock"]                   = "water_source",
 
 	-- solids
 	["default:obsidian"]                    = "default:lava_source",
@@ -239,31 +239,31 @@ minetest.register_abm({
 					local node = minetest.get_node(p)
 					local name = node.name
 					if name ~= MODNAME..":decay" then
-					if name == "air" then
-						minetest.set_node(p, {name=MODNAME..":decay",})
-						return
-					elseif minetest.get_item_group(name, "tree") > 0 then
-						minetest.dig_node(p)
-						return
-					elseif minetest.get_item_group(name, "leaves") > 0 then
-						minetest.dig_node(p)
-						return
-					elseif minetest.get_item_group(name, "ore") > 0 then
-						minetest.swap_node(p, {name="default:stone",})
-					elseif minetest.get_item_group(name, "stone") > 0 then
-						minetest.swap_node(p, {name="default:cobble",})
-						minetest.spawn_falling_node(p)
-						return
-					elseif minetest.get_item_group(name, "soil") > 0 then
-						minetest.swap_node(p, {name="default:dirt",})
-						return
-					elseif decay[name] ~= nil then
-						minetest.swap_node(p, {name=decay[name],})
-						minetest.spawn_falling_node(p)
-						return
-					--elseif minetest.dig_node(p) then
-					--	return
-					end
+						if minetest.get_item_group(name, "tree") > 0 then
+							minetest.dig_node(p)
+							return
+						elseif minetest.get_item_group(name, "leaves") > 0 then
+							minetest.dig_node(p)
+							return
+						elseif minetest.get_item_group(name, "ore") > 0 then
+							minetest.swap_node(p, {name="default:stone",})
+						elseif minetest.get_item_group(name, "stone") > 0 then
+							minetest.swap_node(p, {name="default:cobble",})
+							minetest.spawn_falling_node(p)
+							return
+						elseif minetest.get_item_group(name, "soil") > 0 then
+							minetest.swap_node(p, {name="default:dirt",})
+							return
+						elseif decay[name] ~= nil then
+							minetest.swap_node(p, {name=decay[name],})
+							minetest.spawn_falling_node(p)
+							return
+						elseif name == "air" then
+							minetest.set_node(p, {name=MODNAME..":decay",})
+							return
+						--elseif minetest.dig_node(p) then
+						--	return
+						end
 					end
 				end
 			end
@@ -289,13 +289,13 @@ minetest.register_abm({
 					local node = minetest.get_node(p)
 					local name = node.name
 					if name ~= MODNAME..":blackhole" then
-					if name == "air" then
-						minetest.set_node(p, {name=MODNAME..":blackhole",})
-						return
-					elseif minetest.dig_node(p) then
-						-- TODO set velocity
-						return
-					end
+						if minetest.dig_node(p) then
+							-- TODO set velocity
+							return
+						elseif name == "air" then
+							minetest.set_node(p, {name=MODNAME..":blackhole",})
+							return
+						end
 					end
 				end
 			end
@@ -321,14 +321,14 @@ minetest.register_abm({
 					local node = minetest.get_node(p)
 					local name = node.name
 					if name ~= MODNAME..":supernova" then
-					if name == "air" then
-						minetest.set_node(p, {name=MODNAME..":supernova",})
-						return
-					elseif minetest.remove_node(p) then
-						-- TODO play sound
-						-- TODO spawn particles
-						return
-					end
+						if minetest.remove_node(p) then
+							-- TODO play sound
+							-- TODO spawn particles
+							return
+						elseif name == "air" then
+							minetest.set_node(p, {name=MODNAME..":supernova",})
+							return
+						end
 					end
 				end
 			end
@@ -336,3 +336,195 @@ minetest.register_abm({
 	end,
 })
 end
+
+-- TODO fiery air
+-- TODO frozen air
+
+-- TODO wtf
+
+def = minetest.registered_nodes[air]
+def = table.copy(def)
+def.description = S("Hot Air")
+def.damage_per_second = 1
+def.walkable = false
+def.groups.igniter = 5
+def.groups.lava = 3
+minetest.register_node(MODNAME..":hot_air", def)
+if true then
+minetest.register_abm({
+	label     = "Hot Air",
+	nodenames = {MODNAME..":hot_air",},
+	--neighbors = {},
+	interval  = 1.0,
+	chance    = 1.0,
+	--catch_up  = true,
+	action    = function(
+		pos, node, active_object_count, active_object_count_wider)
+		pos = vector.round(pos)
+		for dx=-1,1 do
+			for dy=-1,1 do
+				for dz=-1,1 do
+					local p = vector.add(pos, {x=dx, y=dy, z=dz})
+					local node = minetest.get_node(p)
+					local name = node.name
+					if name ~= MODNAME..":hot_air" then
+						if minetest.get_item_group(name, "water") > 0 then
+							minetest.set_node(p, {name="default:lava_flowing",})
+							return
+						elseif minetest.get_item_group(name, "flammable") > 0
+						--or     minetest.get_item_group(name, "tree") > 0
+						--or     minetest.get_item_group(name, "leafdecay") > 0
+							then
+							minetest.set_node(p, {name="fire:basic_flame",})
+							return
+						elseif name == "air" then
+							minetest.set_node(p, {name=MODNAME..":hot_air",})
+							return
+						--elseif minetest.remove_node(p) then
+						--	-- TODO play sound
+						--	-- TODO spawn particles
+						--	return
+						end
+					end
+				end
+			end
+		end
+	end,
+})
+end
+
+-- TODO fiery air
+-- TODO frozen air
+
+def = minetest.registered_nodes[air]
+def = table.copy(def)
+def.description = S("Cold Air")
+def.damage_per_second = 1
+def.walkable = false
+def.groups.puts_out_fire = 5
+def.groups.water = 3
+def.groups.cools_lava = 3
+minetest.register_node(MODNAME..":cold_air", def)
+-- TODO replace grass with snow, freeze water
+if true then
+minetest.register_abm({
+	label     = "Cold Air",
+	nodenames = {MODNAME..":cold_air",},
+	--neighbors = {},
+	interval  = 1.0,
+	chance    = 1.0,
+	--catch_up  = true,
+	action    = function(
+		pos, node, active_object_count, active_object_count_wider)
+		pos = vector.round(pos)
+		for dx=-1,1 do
+			for dy=-1,1 do
+				for dz=-1,1 do
+					local p = vector.add(pos, {x=dx, y=dy, z=dz})
+					--local p = {x=pos.x+dx, y=pos.y+dy, z=pos.z+dz}
+					local node = minetest.get_node(p)
+					local name = node.name
+					--print('name: '..name)
+					if name ~= MODNAME..":cold_air" then
+						if minetest.get_item_group(name, "water") > 0
+						and name ~= "default:ice" then
+							--print('water')
+							minetest.swap_node(p, {name="default:ice",})
+							return
+						elseif minetest.get_item_group(name, "liquid") > 0
+						and name ~= "default:water_flowing" then
+							--print('water')
+							minetest.swap_node(p, {name="default:water_flowing",})
+							return
+
+						elseif minetest.get_item_group(name, "tree") > 0
+						or     minetest.get_item_group(name, "wood") > 0
+						--or     minetest.get_item_group(name, "flammable") > 0
+						then
+							--print('tree')
+							minetest.swap_node(p, {name="default:ice",})
+							return
+						elseif minetest.get_item_group(name, "leafdecay") > 0
+						or     minetest.get_item_group(name, "leaves") > 0
+						or     minetest.get_item_group(name, "flora") > 0 then
+							--print('leaf')
+							minetest.swap_node(p, {name="default:snowblock",})
+							return
+
+						elseif minetest.get_item_group(name, "soil") > 0
+						and name ~= "default:permafrost" then
+							--print('soil')
+							minetest.swap_node(p, {name="default:permafrost",})
+							return
+						elseif name == "default:dirt_with_grass"
+						or     name == "default:dirt"
+						then
+							--print('dirt')
+							minetest.swap_node(p, {name="default:dirt_with_snow",})
+							return
+
+						elseif name == "air" then
+							--print('air')
+							minetest.set_node(p, {name=MODNAME..":cold_air",})
+							return
+						--elseif minetest.get_item_group(name, "leafdecay", "flora") then
+						end
+					end
+				end
+			end
+		end
+	end,
+})
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local dirt = "default:dirt"
+def = minetest.registered_nodes[dirt]
+def = table.copy(def)
+def.description = S("Tainted Dirt")
+def.damage_per_second = 1
+def.groups.soil = 0
+minetest.register_node(MODNAME..":tainted_dirt", def)
+if false then
+minetest.register_abm({
+	label     = "Taint",
+	nodenames = {MODNAME..":tainted_dirt",},
+	neighbors = {"group:soil",},
+	interval  = 1.0,
+	chance    = 1.0,
+	--catch_up  = true,
+	action    = function(
+		pos, node, active_object_count, active_object_count_wider)
+		local p = minetest.find_node_near(pos, 1, {"group:soil",})
+		local node = minetest.get_node(p)
+		local name = node.name
+		--print('name: '..name)
+		if name ~= MODNAME..":tainted_dirt" then
+			if minetest.get_item_group(name, "soil") > 0
+			then
+				--print('soil')
+				minetest.swap_node(p, {name=MODNAME..":tainted_dirt",})
+				--return
+			end
+		end
+	end,
+})
+end
+
