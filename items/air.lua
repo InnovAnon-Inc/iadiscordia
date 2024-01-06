@@ -23,6 +23,7 @@ def.description = S("Brightness")
 def.light_source = minetest.LIGHT_MAX
 def.walkable = false
 def.groups.air = 1
+-- TODO trees don't grow right
 minetest.register_node(MODNAME..":brightness", def)
 
 iadiscordia.register_replacement("default:glass", MODNAME..":darkness",       "Darkness")
